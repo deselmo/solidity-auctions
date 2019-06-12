@@ -37,12 +37,6 @@ contract Auction {
     _;
   }
 
-  modifier isNotInGracePhase() {
-    require(!inGracePhase(),
-           'It is necessary not to be in grace phase to call this operation');
-    _;
-  }
-
   function forceGracePhaseTermination() external isInGracePhase {
     gracePhaseLength = block.number - gracePhaseStartBlock();
   }

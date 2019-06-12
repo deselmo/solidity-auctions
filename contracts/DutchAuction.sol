@@ -120,12 +120,6 @@ contract DutchAuction is Auction {
     _;
   }
 
-  modifier isNotInBidPhase() {
-    require(!inBidPhase(),
-           'It is necessary not to be in bid phase to call this operation');
-    _;
-  }
-
   function forceBidPhaseTermination() external isInBidPhase {
     bidPhaseLength = block.number - bidPhaseStartBlock();
   }
