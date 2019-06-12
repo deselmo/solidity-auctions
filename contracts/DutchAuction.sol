@@ -126,7 +126,7 @@ contract DutchAuction is Auction {
     }
 
     function forceBidPhaseTermination() external isInBidPhase {
-      bidPhaseLength = block.number - bidPhaseStartBlock();
+      bidPhaseLength = block.number - bidPhaseStartBlock() + 1;
     }
   // }
 

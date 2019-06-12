@@ -41,7 +41,7 @@ contract Auction {
     }
 
     function forceGracePhaseTermination() external isInGracePhase {
-      gracePhaseLength = block.number - gracePhaseStartBlock();
+      gracePhaseLength = block.number - gracePhaseStartBlock() + 1;
     }
   // }
 
