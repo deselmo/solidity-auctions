@@ -1,7 +1,7 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 contract Auction {
-  uint internal gracePeriod = 4500; // ~ 5 minuts
+  uint internal gracePhase = 4500; // ~ 5 minuts
   uint internal creationBlock;
 
   address payable public seller;
@@ -11,21 +11,21 @@ contract Auction {
     creationBlock = block.number;
   }
 
-  function gracePeriodEndBlock() internal view returns(uint) {
-    return creationBlock + gracePeriod;
+  function gracePhaseEndBlock() internal view returns(uint) {
+    return creationBlock + gracePhase;
   }
 
-  function activated() public view returns(bool) {
-    return block.number > gracePeriodEndBlock();
+  function inGracePhase() public view returns(bool) {
+    return block.number <= gracePhaseEndBlock();
   }
 
-  modifier isAuctionActive() {
-    require(activated(), 'The grace period has not yet elapsed');
+  modifier isInGracePhase() {
+    require(inGracePhase(), 'This auction is in grace phase');
     _;
   }
 
-  modifier isNotAuctionActive() {
-    require(!activated(), 'The grace period is already elapsed');
+  modifier isNotInGracePhase() {
+    require(!inGracePhase(), 'This auction is not in grace phase');
     _;
   }
 
@@ -34,7 +34,7 @@ contract Auction {
     _;
   }
 
-  function forceGracePeriodTermination() external isNotAuctionActive {
-    gracePeriod = block.number - creationBlock;
+  function forceGracePhaseTermination() external isInGracePhase {
+    gracePhase = block.number - creationBlock;
   }
 }

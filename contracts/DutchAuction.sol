@@ -53,7 +53,7 @@ contract DutchAuction is Auction {
   }
 
   function startBlock() private view returns(uint) {
-    return gracePeriodEndBlock() + 1;
+    return gracePhaseEndBlock() + 1;
   }
 
   function endBlock() private view returns(uint) {
@@ -61,7 +61,8 @@ contract DutchAuction is Auction {
   }
 
   function winner() public view
-    isTerminated
+    isNotInGracePhase
+    isNotInBidPhase
     returns(address)
   {
     require(_winner != address(0), 'No one won this auction');
@@ -69,8 +70,8 @@ contract DutchAuction is Auction {
   }
 
   function currentPrice() public view
-    isAuctionActive
-    isNotTerminated
+    isNotInGracePhase
+    isInBidPhase
     returns(uint)
   {
     return initialPrice - timingFunction.compute(
@@ -81,9 +82,9 @@ contract DutchAuction is Auction {
   }
 
   function bid() public payable
-    isAuctionActive
+    isNotInGracePhase
     isNotSeller
-    isNotTerminated
+    isInBidPhase
   {
     uint _currentPrice = currentPrice();
 
@@ -109,23 +110,23 @@ contract DutchAuction is Auction {
     return;
   }
 
-  function terminated() public view returns(bool) {
-    return _winner != address(0) || block.number > endBlock();
+  function inBidPhase() public view returns(bool) {
+    return _winner == address(0) && block.number <= endBlock();
   }
 
-  modifier isTerminated() {
-    require(terminated(), 'This auction is yet not terminated');
+  modifier isInBidPhase() {
+    require(inBidPhase(), 'This auction is in bid phase');
     _;
   }
 
-  modifier isNotTerminated() {
-    require(!terminated(), 'This auction is terminated');
+  modifier isNotInBidPhase() {
+    require(!inBidPhase(), 'This auction is not in bid phase');
     _;
   }
 
-  function forceBidPeriodTermination() external
-    isAuctionActive
-    isNotTerminated
+  function forceBidPhaseTermination() external
+    isNotInGracePhase
+    isInBidPhase
   {
     duration = block.number - startBlock();
   }
