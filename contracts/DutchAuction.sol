@@ -9,9 +9,6 @@ contract DutchAuction is Auction {
   uint public duration;
   TimingFunction public timingFunction;
 
-  uint private startBlock;
-  uint private endBlock;
-
   uint private maxOffsetPrice;
 
   address private _winner;
@@ -45,9 +42,6 @@ contract DutchAuction is Auction {
     duration = _duration;
     timingFunction = _timingFunction;
 
-    startBlock = block.number + gracePeriod + 1;
-    endBlock = startBlock + duration;
-
     maxOffsetPrice = initialPrice - reservePrice;
 
     emit LogStartAuction(
@@ -56,6 +50,14 @@ contract DutchAuction is Auction {
       initialPrice,
       duration
     );
+  }
+
+  function startBlock() private view returns(uint) {
+    return creationBlock + gracePeriod + 1;
+  }
+
+  function endBlock() private view returns(uint) {
+    return startBlock() + duration;
   }
 
   function winner() public view
@@ -73,7 +75,7 @@ contract DutchAuction is Auction {
   {
     return initialPrice - timingFunction.compute(
       maxOffsetPrice,
-      block.number - startBlock,
+      block.number - startBlock(),
       duration
     );
   }
@@ -108,7 +110,7 @@ contract DutchAuction is Auction {
   }
 
   function terminated() public view returns(bool) {
-    return _winner != address(0) || block.number > endBlock;
+    return _winner != address(0) || block.number > endBlock();
   }
 
   modifier isTerminated() {
@@ -119,5 +121,12 @@ contract DutchAuction is Auction {
   modifier isNotTerminated() {
     require(!terminated(), 'This auction is terminated');
     _;
+  }
+
+  function forceBidPeriodTermination() external
+    isAuctionActive
+    isNotTerminated
+  {
+    duration = block.number - startBlock();
   }
 }
