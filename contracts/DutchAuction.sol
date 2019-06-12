@@ -53,7 +53,7 @@ contract DutchAuction is Auction {
   }
 
   function startBlock() private view returns(uint) {
-    return creationBlock + gracePeriod + 1;
+    return gracePeriodEndBlock() + 1;
   }
 
   function endBlock() private view returns(uint) {
