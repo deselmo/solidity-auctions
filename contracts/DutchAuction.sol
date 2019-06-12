@@ -6,7 +6,7 @@ import "./TimingFunction.sol";
 contract DutchAuction is Auction {
   uint public reservePrice;
   uint public initialPrice;
-  uint public duration;
+  uint public bidPhaseLength;
   TimingFunction public timingFunction;
 
   uint private maxOffsetPrice;
@@ -39,7 +39,7 @@ contract DutchAuction is Auction {
 
     reservePrice = _reservePrice;
     initialPrice = _initialPrice;
-    duration = _duration;
+    bidPhaseLength = _duration;
     timingFunction = _timingFunction;
 
     maxOffsetPrice = initialPrice - reservePrice;
@@ -48,21 +48,12 @@ contract DutchAuction is Auction {
       seller,
       reservePrice,
       initialPrice,
-      duration
+      bidPhaseLength
     );
   }
 
-  function startBlock() private view returns(uint) {
-    return gracePhaseEndBlock() + 1;
-  }
-
-  function endBlock() private view returns(uint) {
-    return startBlock() + duration;
-  }
-
   function winner() public view
-    isNotInGracePhase
-    isNotInBidPhase
+    isAuctionTerminated
     returns(address)
   {
     require(_winner != address(0), 'No one won this auction');
@@ -70,21 +61,19 @@ contract DutchAuction is Auction {
   }
 
   function currentPrice() public view
-    isNotInGracePhase
     isInBidPhase
     returns(uint)
   {
     return initialPrice - timingFunction.compute(
       maxOffsetPrice,
-      block.number - startBlock(),
-      duration
+      block.number - bidPhaseStartBlock(),
+      bidPhaseLength
     );
   }
 
   function bid() public payable
-    isNotInGracePhase
-    isNotSeller
     isInBidPhase
+    isNotSeller
   {
     uint _currentPrice = currentPrice();
 
@@ -110,24 +99,39 @@ contract DutchAuction is Auction {
     return;
   }
 
+
+  function bidPhaseStartBlock() internal view returns(uint) {
+    return gracePhaseEndBlock() + 1;
+  }
+
+  function bidPhaseEndBlock() internal view returns(uint) {
+    return bidPhaseStartBlock() + bidPhaseLength;
+  }
+
   function inBidPhase() public view returns(bool) {
-    return _winner == address(0) && block.number <= endBlock();
+    return _winner == address(0) &&
+           block.number >= bidPhaseStartBlock() &&
+           block.number <= bidPhaseEndBlock();
   }
 
   modifier isInBidPhase() {
-    require(inBidPhase(), 'This auction is not in bid phase');
+    require(inBidPhase(),
+           'It is necessary to be in bid phase to call this operation');
     _;
   }
 
   modifier isNotInBidPhase() {
-    require(!inBidPhase(), 'This auction is in bid phase');
+    require(!inBidPhase(),
+           'It is necessary not to be in bid phase to call this operation');
     _;
   }
 
-  function forceBidPhaseTermination() external
-    isNotInGracePhase
-    isInBidPhase
-  {
-    duration = block.number - startBlock();
+  function forceBidPhaseTermination() external isInBidPhase {
+    bidPhaseLength = block.number - bidPhaseStartBlock();
+  }
+
+
+  function auctionTerminated() public view returns(bool) {
+    return block.number > bidPhaseEndBlock();
   }
 }
