@@ -121,7 +121,7 @@ contract DutchAuction is Auction {
 
     modifier isInBidPhase() {
       require(inBidPhase(),
-            'It is necessary to be in bid phase to call this operation');
+              'It is necessary to be in bid phase to call this operation');
       _;
     }
 

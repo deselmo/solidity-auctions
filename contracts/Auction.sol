@@ -36,7 +36,7 @@ contract Auction {
 
     modifier isInGracePhase() {
       require(inGracePhase(),
-            'It is necessary to be in grace phase to call this operation');
+              'It is necessary to be in grace phase to call this operation');
       _;
     }
 
