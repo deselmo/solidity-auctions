@@ -20,12 +20,12 @@ contract Auction {
   }
 
   modifier isInGracePhase() {
-    require(inGracePhase(), 'This auction is in grace phase');
+    require(inGracePhase(), 'This auction is not in grace phase');
     _;
   }
 
   modifier isNotInGracePhase() {
-    require(!inGracePhase(), 'This auction is not in grace phase');
+    require(!inGracePhase(), 'This auction is in grace phase');
     _;
   }
 

@@ -115,12 +115,12 @@ contract DutchAuction is Auction {
   }
 
   modifier isInBidPhase() {
-    require(inBidPhase(), 'This auction is in bid phase');
+    require(inBidPhase(), 'This auction is not in bid phase');
     _;
   }
 
   modifier isNotInBidPhase() {
-    require(!inBidPhase(), 'This auction is not in bid phase');
+    require(!inBidPhase(), 'This auction is in bid phase');
     _;
   }
 
