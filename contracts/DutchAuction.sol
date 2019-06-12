@@ -9,7 +9,8 @@ contract DutchAuction is Auction {
   uint public bidPhaseLength;
   TimingFunction public timingFunction;
 
-  uint private maxOffsetPrice;
+  uint private bidPhaseLengthMinusOne;
+  uint private maxPriceOffset;
 
   address private _winner;
 
@@ -35,14 +36,18 @@ contract DutchAuction is Auction {
     uint _duration,
     TimingFunction _timingFunction
   ) public {
-    require(_initialPrice > 0, '_initialPrice must be bigger than 0');
+    require(_initialPrice > 0,
+            '_initialPrice must be bigger than 0');
+    require(_initialPrice >= _reservePrice,
+            '_initialPrice must be bigger than or equal to _reservePrice');
 
     reservePrice = _reservePrice;
     initialPrice = _initialPrice;
     bidPhaseLength = _duration;
     timingFunction = _timingFunction;
 
-    maxOffsetPrice = initialPrice - reservePrice;
+    maxPriceOffset = initialPrice - reservePrice;
+    bidPhaseLengthMinusOne = bidPhaseLength - 1;
 
     emit LogStartAuction(
       seller,
@@ -65,9 +70,9 @@ contract DutchAuction is Auction {
     returns(uint)
   {
     return initialPrice - timingFunction.compute(
-      maxOffsetPrice,
+      maxPriceOffset,
       block.number - bidPhaseStartBlock(),
-      bidPhaseLength
+      bidPhaseLengthMinusOne
     );
   }
 
@@ -101,7 +106,7 @@ contract DutchAuction is Auction {
 
   // bidPhase {
     function bidPhaseStartBlock() internal view returns(uint) {
-      return gracePhaseEndBlock() + 1;
+      return gracePhaseEndBlock();
     }
 
     function bidPhaseEndBlock() internal view returns(uint) {
@@ -111,7 +116,7 @@ contract DutchAuction is Auction {
     function inBidPhase() public view returns(bool) {
       return _winner == address(0) &&
             block.number >= bidPhaseStartBlock() &&
-            block.number <= bidPhaseEndBlock();
+            block.number < bidPhaseEndBlock();
     }
 
     modifier isInBidPhase() {
@@ -126,6 +131,6 @@ contract DutchAuction is Auction {
   // }
 
   function auctionTerminated() public view returns(bool) {
-    return block.number > bidPhaseEndBlock();
+    return block.number >= bidPhaseEndBlock();
   }
 }
