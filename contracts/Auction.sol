@@ -15,11 +15,6 @@ contract Auction {
     return creationBlock + gracePeriod;
   }
 
-  function bid() public payable
-    isAuctionActive
-    isNotSeller
-  {}
-
   function activated() public view returns(bool) {
     return block.number > gracePeriodEndBlock();
   }

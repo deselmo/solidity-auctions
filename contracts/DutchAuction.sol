@@ -81,10 +81,10 @@ contract DutchAuction is Auction {
   }
 
   function bid() public payable
+    isAuctionActive
+    isNotSeller
     isNotTerminated
   {
-    super.bid();
-
     uint _currentPrice = currentPrice();
 
     assert(_currentPrice <= initialPrice);
