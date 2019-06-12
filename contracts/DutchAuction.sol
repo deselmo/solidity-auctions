@@ -99,31 +99,31 @@ contract DutchAuction is Auction {
     return;
   }
 
+  // bidPhase {
+    function bidPhaseStartBlock() internal view returns(uint) {
+      return gracePhaseEndBlock() + 1;
+    }
 
-  function bidPhaseStartBlock() internal view returns(uint) {
-    return gracePhaseEndBlock() + 1;
-  }
+    function bidPhaseEndBlock() internal view returns(uint) {
+      return bidPhaseStartBlock() + bidPhaseLength;
+    }
 
-  function bidPhaseEndBlock() internal view returns(uint) {
-    return bidPhaseStartBlock() + bidPhaseLength;
-  }
+    function inBidPhase() public view returns(bool) {
+      return _winner == address(0) &&
+            block.number >= bidPhaseStartBlock() &&
+            block.number <= bidPhaseEndBlock();
+    }
 
-  function inBidPhase() public view returns(bool) {
-    return _winner == address(0) &&
-           block.number >= bidPhaseStartBlock() &&
-           block.number <= bidPhaseEndBlock();
-  }
+    modifier isInBidPhase() {
+      require(inBidPhase(),
+            'It is necessary to be in bid phase to call this operation');
+      _;
+    }
 
-  modifier isInBidPhase() {
-    require(inBidPhase(),
-           'It is necessary to be in bid phase to call this operation');
-    _;
-  }
-
-  function forceBidPhaseTermination() external isInBidPhase {
-    bidPhaseLength = block.number - bidPhaseStartBlock();
-  }
-
+    function forceBidPhaseTermination() external isInBidPhase {
+      bidPhaseLength = block.number - bidPhaseStartBlock();
+    }
+  // }
 
   function auctionTerminated() public view returns(bool) {
     return block.number > bidPhaseEndBlock();

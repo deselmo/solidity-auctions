@@ -17,30 +17,30 @@ contract Auction {
     _;
   }
 
+  // gracePhase {
+    function gracePhaseStartBlock() internal view returns(uint) {
+      return creationBlock + 1;
+    }
 
-  function gracePhaseStartBlock() internal view returns(uint) {
-    return creationBlock + 1;
-  }
+    function gracePhaseEndBlock() internal view returns(uint) {
+      return gracePhaseStartBlock() + gracePhaseLength;
+    }
 
-  function gracePhaseEndBlock() internal view returns(uint) {
-    return gracePhaseStartBlock() + gracePhaseLength;
-  }
+    function inGracePhase() public view returns(bool) {
+      return block.number >= gracePhaseStartBlock() &&
+            block.number <= gracePhaseEndBlock();
+    }
 
-  function inGracePhase() public view returns(bool) {
-    return block.number >= gracePhaseStartBlock() &&
-           block.number <= gracePhaseEndBlock();
-  }
+    modifier isInGracePhase() {
+      require(inGracePhase(),
+            'It is necessary to be in grace phase to call this operation');
+      _;
+    }
 
-  modifier isInGracePhase() {
-    require(inGracePhase(),
-           'It is necessary to be in grace phase to call this operation');
-    _;
-  }
-
-  function forceGracePhaseTermination() external isInGracePhase {
-    gracePhaseLength = block.number - gracePhaseStartBlock();
-  }
-
+    function forceGracePhaseTermination() external isInGracePhase {
+      gracePhaseLength = block.number - gracePhaseStartBlock();
+    }
+  // }
 
   function auctionTerminated() public view returns(bool);
 
