@@ -4,9 +4,9 @@ import "./Auction.sol";
 
 contract VickreyAuction is Auction {
   uint public reservePrice;
-  uint public commitmentPhaseLength;
-  uint public withdrawalPhaseLength;
-  uint public openingPhaseLength;
+  uint public lengthCommitmentPhase;
+  uint public lengthWithdrawalPhase;
+  uint public lengthPpeningPhase;
   uint public depositRequirement;
 
   mapping (address => bytes32) private commitments;
@@ -18,38 +18,38 @@ contract VickreyAuction is Auction {
 
   event LogStartAuction(
     address seller,
-    uint commitmentPhaseLength,
-    uint withdrawalPhaseLength,
-    uint openingPhaseLength,
+    uint lengthCommitmentPhase,
+    uint lengthWithdrawalPhase,
+    uint lengthPpeningPhase,
     uint depositRequirement
   );
 
   constructor(
     uint _reservePrice,
-    uint _commitmentPhaseLength,
-    uint _withdrawalPhaseLength,
-    uint _openingPhaseLength,
+    uint _lengthCommitmentPhase,
+    uint _lengthWithdrawalPhase,
+    uint _lengthPpeningPhase,
     uint _depositRequirement,
     bool _debug
   ) Auction(_debug) public {
-    require(_commitmentPhaseLength > 0,
-            '_commitmentPhaseLength must be bigger than 0');
-    require(_openingPhaseLength > 0,
-            '_openingPhaseLength must be bigger than 0');
+    require(_lengthCommitmentPhase > 0,
+            '_lengthCommitmentPhase must be bigger than 0');
+    require(_lengthPpeningPhase > 0,
+            '_lengthPpeningPhase must be bigger than 0');
 
     reservePrice = _reservePrice;
-    commitmentPhaseLength = _commitmentPhaseLength;
-    withdrawalPhaseLength = _withdrawalPhaseLength;
-    openingPhaseLength = _openingPhaseLength;
+    lengthCommitmentPhase = _lengthCommitmentPhase;
+    lengthWithdrawalPhase = _lengthWithdrawalPhase;
+    lengthPpeningPhase = _lengthPpeningPhase;
     depositRequirement = _depositRequirement;
 
     winningPrice = reservePrice;
 
     emit LogStartAuction(
       seller,
-      commitmentPhaseLength,
-      withdrawalPhaseLength,
-      openingPhaseLength,
+      lengthCommitmentPhase,
+      lengthWithdrawalPhase,
+      lengthPpeningPhase,
       depositRequirement
     );
   }
@@ -104,7 +104,7 @@ contract VickreyAuction is Auction {
     }
 
     function commitmentPhaseEndBlock() private view returns(uint) {
-      return commitmentPhaseStartBlock() + commitmentPhaseLength;
+      return commitmentPhaseStartBlock() + lengthCommitmentPhase;
     }
 
     function inCommitmentPhase() public view returns(bool) {
@@ -119,7 +119,7 @@ contract VickreyAuction is Auction {
     }
 
     function debugTerminateCommitmentPhase() external isDebug isInCommitmentPhase {
-      commitmentPhaseLength = block.number + 1 - commitmentPhaseStartBlock();
+      lengthCommitmentPhase = block.number + 1 - commitmentPhaseStartBlock();
     }
   // }
 
@@ -139,7 +139,7 @@ contract VickreyAuction is Auction {
     }
 
     function withdrawalPhaseEndBlock() private view returns(uint) {
-      return withdrawalPhaseStartBlock() + withdrawalPhaseLength;
+      return withdrawalPhaseStartBlock() + lengthWithdrawalPhase;
     }
 
     function inWithdrawalPhase() public view returns(bool) {
@@ -154,7 +154,7 @@ contract VickreyAuction is Auction {
     }
 
     function debugTerminateWithdrawalPhase() external isDebug isInWithdrawalPhase {
-      withdrawalPhaseLength = block.number + 1 - withdrawalPhaseStartBlock();
+      lengthWithdrawalPhase = block.number + 1 - withdrawalPhaseStartBlock();
     }
   // }
 
@@ -164,7 +164,7 @@ contract VickreyAuction is Auction {
     }
 
     function openingPhaseEndBlock() private view returns(uint) {
-      return openingPhaseStartBlock() + openingPhaseLength;
+      return openingPhaseStartBlock() + lengthPpeningPhase;
     }
 
     function inOpeningPhase() public view returns(bool) {
@@ -179,7 +179,7 @@ contract VickreyAuction is Auction {
     }
 
     function debugTerminateOpeningPhase() external isDebug isInOpeningPhase {
-      openingPhaseLength = block.number + 1 - openingPhaseStartBlock();
+      lengthPpeningPhase = block.number + 1 - openingPhaseStartBlock();
     }
   // }
 
@@ -217,7 +217,7 @@ contract VickreyAuction is Auction {
       return openingPhaseEndBlock();
     }
 
-    bool public finalized = false;
+    bool private finalized = false;
 
     function inFinalizationPhase() public view returns(bool) {
       return block.number >= finalizationPhaseStartBlock() &&
@@ -242,7 +242,7 @@ contract VickreyAuction is Auction {
     }
   // }
 
-  function auctionTerminated() public view returns(bool) {
+  function terminated() public view returns(bool) {
     return finalized;
   }
 }

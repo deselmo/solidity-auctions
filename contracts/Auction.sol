@@ -64,10 +64,10 @@ contract Auction {
     }
   // }
 
-  function auctionTerminated() public view returns(bool);
+  function terminated() public view returns(bool);
 
   modifier isAuctionTerminated() {
-    require(auctionTerminated(),
+    require(terminated(),
             'The auction must be completed to call this operation');
     _;
   }

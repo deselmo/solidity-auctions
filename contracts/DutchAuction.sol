@@ -121,7 +121,7 @@ contract DutchAuction is Auction {
     }
   // }
 
-  function auctionTerminated() public view returns(bool) {
+  function terminated() public view returns(bool) {
     return block.number >= bidPhaseEndBlock();
   }
 }
