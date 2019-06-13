@@ -167,31 +167,6 @@ contract VickreyAuction is Auction {
   // }
 
   // openingPhase {
-    function openingPhaseStartBlock() private view returns(uint) {
-      return withdrawalPhaseEndBlock();
-    }
-
-    function openingPhaseEndBlock() private view returns(uint) {
-      return openingPhaseStartBlock() + lengthPpeningPhase;
-    }
-
-    function inOpeningPhase() public view returns(bool) {
-      return block.number >= openingPhaseStartBlock() &&
-             block.number < openingPhaseEndBlock();
-    }
-
-    modifier isInOpeningPhase() {
-      require(inOpeningPhase(),
-              'It is necessary to be in opening phase to call this operation');
-      _;
-    }
-
-    function debugTerminateOpeningPhase() external isDebug isInOpeningPhase {
-      lengthPpeningPhase = block.number + 1 - openingPhaseStartBlock();
-    }
-  // }
-
-  // finalizationPhase {
     function open(bytes32 nonce) external payable
       isInOpeningPhase
       isNotSeller
@@ -220,7 +195,31 @@ contract VickreyAuction is Auction {
       }
     }
 
+    function openingPhaseStartBlock() private view returns(uint) {
+      return withdrawalPhaseEndBlock();
+    }
 
+    function openingPhaseEndBlock() private view returns(uint) {
+      return openingPhaseStartBlock() + lengthPpeningPhase;
+    }
+
+    function inOpeningPhase() public view returns(bool) {
+      return block.number >= openingPhaseStartBlock() &&
+             block.number < openingPhaseEndBlock();
+    }
+
+    modifier isInOpeningPhase() {
+      require(inOpeningPhase(),
+              'It is necessary to be in opening phase to call this operation');
+      _;
+    }
+
+    function debugTerminateOpeningPhase() external isDebug isInOpeningPhase {
+      lengthPpeningPhase = block.number + 1 - openingPhaseStartBlock();
+    }
+  // }
+
+  // finalizationPhase {
     function finalizationPhaseStartBlock() private view returns(uint) {
       return openingPhaseEndBlock();
     }
