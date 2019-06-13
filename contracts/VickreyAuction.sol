@@ -54,11 +54,18 @@ contract VickreyAuction is Auction {
     );
   }
 
-  function debugComputeKeccak256(bytes32 nonce, uint value) public view
+  function debugComputeKeccak256(bytes32 nonce, uint value) external view
     isDebug
     returns(bytes32)
   {
     return keccak256(abi.encode(nonce, value));
+  }
+
+  function debugBurnedValue() external view
+    isDebug
+    returns(uint)
+  {
+    return _burnedValue;
   }
 
   function senderCommitmentPresent() private view returns(bool) {
@@ -239,7 +246,9 @@ contract VickreyAuction is Auction {
       }
 
       _burnedValue = address(this).balance;
-      address(0).transfer(_burnedValue);
+      if(_burnedValue > 0) {
+        address(0).transfer(_burnedValue);
+      }
     }
   // }
 
