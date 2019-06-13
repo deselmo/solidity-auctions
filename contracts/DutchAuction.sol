@@ -12,8 +12,6 @@ contract DutchAuction is Auction {
   uint private bidPhaseLengthMinusOne;
   uint private maxPriceOffset;
 
-  address private _winner;
-
   event LogStartAuction(
     address seller,
     uint reservePrice,
@@ -56,14 +54,6 @@ contract DutchAuction is Auction {
       initialPrice,
       bidPhaseLength
     );
-  }
-
-  function winner() public view
-    isAuctionTerminated
-    returns(address)
-  {
-    require(_winner != address(0), 'No one won this auction');
-    return _winner;
   }
 
   function currentPrice() public view

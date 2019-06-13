@@ -5,6 +5,7 @@ contract Auction {
   uint internal creationBlock;
 
   address payable public seller;
+  address payable internal _winner;
 
   bool public debug = false;
 
@@ -13,6 +14,15 @@ contract Auction {
     creationBlock = block.number;
 
     debug = _debug;
+  }
+
+
+  function winner() public view
+    isAuctionTerminated
+    returns(address)
+  {
+    require(_winner != address(0), 'No one won this auction');
+    return _winner;
   }
 
 
