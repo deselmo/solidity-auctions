@@ -35,8 +35,8 @@ contract DutchAuction is Auction {
     uint _initialPrice,
     uint _duration,
     TimingFunction _timingFunction,
-    bool debug
-  ) Auction(debug) public {
+    bool _debug
+  ) Auction(_debug) public {
     require(_initialPrice > 0,
             '_initialPrice must be bigger than 0');
     require(_initialPrice >= _reservePrice,
