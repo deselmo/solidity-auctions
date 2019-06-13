@@ -26,12 +26,12 @@ contract Auction {
   }
 
 
-  function balance() public view isDebug returns(uint) {
+  function debugBalance() public view isDebug returns(uint) {
     return address(this).balance;
   }
 
 
-  function dummyBlock() external payable isDebug { return; }
+  function debugDummyBlock() external payable isDebug { return; }
 
 
   modifier isNotSeller() {
@@ -59,7 +59,7 @@ contract Auction {
       _;
     }
 
-    function forceGracePhaseTermination() external isDebug isInGracePhase {
+    function debugTerminateGracePhase() external isDebug isInGracePhase {
       gracePhaseLength = block.number + 1 - gracePhaseStartBlock();
     }
   // }
