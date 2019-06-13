@@ -89,7 +89,8 @@ contract VickreyAuction is Auction {
       commitments[msg.sender] = commitment;
     }
 
-    function getBidCommitment() external view
+    function debugGetBidCommitment() external view
+      isDebug
       isInCommitmentPhase
       isNotSeller
       isSenderCommitmentPresent
