@@ -34,8 +34,9 @@ contract DutchAuction is Auction {
     uint _reservePrice,
     uint _initialPrice,
     uint _duration,
-    TimingFunction _timingFunction
-  ) public {
+    TimingFunction _timingFunction,
+    bool debug
+  ) Auction(debug) public {
     require(_initialPrice > 0,
             '_initialPrice must be bigger than 0');
     require(_initialPrice >= _reservePrice,
@@ -125,7 +126,7 @@ contract DutchAuction is Auction {
       _;
     }
 
-    function forceBidPhaseTermination() external isInBidPhase {
+    function forceBidPhaseTermination() external isDebug isInBidPhase {
       bidPhaseLength = block.number + 1 - bidPhaseStartBlock();
     }
   // }

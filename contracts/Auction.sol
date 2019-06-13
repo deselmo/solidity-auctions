@@ -6,13 +6,17 @@ contract Auction {
 
   address payable public seller;
 
-  constructor() internal {
+  bool private debug = false;
+
+  constructor(bool _debug) internal {
     seller = msg.sender;
     creationBlock = block.number;
+
+    debug = _debug;
   }
 
 
-  function dummyBlock() external payable { return; }
+  function dummyBlock() external payable isDebug { return; }
 
 
   modifier isNotSeller() {
@@ -40,7 +44,7 @@ contract Auction {
       _;
     }
 
-    function forceGracePhaseTermination() external isInGracePhase {
+    function forceGracePhaseTermination() external isDebug isInGracePhase {
       gracePhaseLength = block.number + 1 - gracePhaseStartBlock();
     }
   // }
@@ -50,6 +54,11 @@ contract Auction {
   modifier isAuctionTerminated() {
     require(auctionTerminated(),
             'The auction must be completed to call this operation');
+    _;
+  }
+
+  modifier isDebug() {
+    require(debug, 'This operation is available only in debug mode');
     _;
   }
 }
