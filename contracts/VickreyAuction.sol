@@ -241,8 +241,12 @@ contract VickreyAuction is Auction {
     function finalize() external isInFinalizationPhase {
       finalized = true;
 
-      if(_winner != address(0) && winnerValue > winningPrice) {
-        _winner.transfer(winnerValue - winningPrice);
+      if(_winner != address(0)) {
+        if(winnerValue > winningPrice) {
+          _winner.transfer(winnerValue - winningPrice);
+        }
+
+        seller.transfer(winningPrice);
       }
 
       _burnedValue = address(this).balance;
