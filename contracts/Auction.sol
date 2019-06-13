@@ -6,7 +6,7 @@ contract Auction {
 
   address payable public seller;
 
-  bool private debug = false;
+  bool public debug = false;
 
   constructor(bool _debug) internal {
     seller = msg.sender;
