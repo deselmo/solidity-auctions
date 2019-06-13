@@ -18,7 +18,7 @@ contract Auction {
 
 
   function winner() public view
-    isAuctionTerminated
+    isTerminated
     returns(address)
   {
     require(_winner != address(0), 'No one won this auction');
@@ -66,7 +66,7 @@ contract Auction {
 
   function terminated() public view returns(bool);
 
-  modifier isAuctionTerminated() {
+  modifier isTerminated() {
     require(terminated(),
             'The auction must be completed to call this operation');
     _;
