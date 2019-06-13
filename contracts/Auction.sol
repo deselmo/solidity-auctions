@@ -26,6 +26,11 @@ contract Auction {
   }
 
 
+  function balance() public view isDebug returns(uint) {
+    return address(this).balance;
+  }
+
+
   function dummyBlock() external payable isDebug { return; }
 
 
