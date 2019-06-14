@@ -1,8 +1,8 @@
 pragma solidity >=0.4.21 <0.6.0;
 
-import "./TimingFunction.sol";
+import "./ITimingFunction.sol";
 
-contract Linear is TimingFunction {
+contract Linear is ITimingFunction {
   function compute(
     uint value,
     uint time,
@@ -12,7 +12,7 @@ contract Linear is TimingFunction {
   }
 }
 
-contract Quadratic is TimingFunction {
+contract Quadratic is ITimingFunction {
   function compute(
     uint value,
     uint time,

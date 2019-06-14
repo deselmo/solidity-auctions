@@ -1,13 +1,13 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 import "./Auction.sol";
-import "./TimingFunction.sol";
+import "./ITimingFunction.sol";
 
 contract DutchAuction is Auction {
   uint public reservePrice;
   uint public initialPrice;
   uint public bidPhaseLength;
-  TimingFunction public timingFunction;
+  ITimingFunction public timingFunction;
 
   uint private bidPhaseLengthMinusOne;
   uint private maxPriceOffset;
@@ -28,7 +28,7 @@ contract DutchAuction is Auction {
     uint _reservePrice,
     uint _initialPrice,
     uint _duration,
-    TimingFunction _timingFunction,
+    ITimingFunction _timingFunction,
     bool _debug
   ) Auction(_debug) public {
     require(_initialPrice > 0,
