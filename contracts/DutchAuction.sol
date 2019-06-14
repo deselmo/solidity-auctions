@@ -18,14 +18,10 @@ contract DutchAuction is Auction {
     uint initialPrice,
     uint duration
   );
-  event LogEndAuction();
-
-  event LogBid(
-    bool win,
-    address bidder,
+  event LogSold(
+    address winner,
     uint bid,
-    uint price,
-    uint blockNumber
+    uint currentPrice
   );
 
   constructor(
@@ -75,22 +71,13 @@ contract DutchAuction is Auction {
 
     assert(_currentPrice <= initialPrice);
 
-    if(msg.value < _currentPrice) {
-      msg.sender.transfer(msg.value);
-      emit LogBid(false, msg.sender, msg.value, _currentPrice, block.number);
-      return;
-    }
-
-    uint difference = msg.value - _currentPrice;
-
-    if(difference > 0) {
-      msg.sender.transfer(difference);
-    }
+    require(msg.value >= _currentPrice,
+            'the bid is not high enough');
 
     _winner = msg.sender;
-    seller.transfer(_currentPrice);
+    seller.transfer(msg.value);
 
-    emit LogBid(true, msg.sender, msg.value, _currentPrice, block.number);
+    emit LogEndAuction(true, msg.sender, msg.value, _currentPrice);
 
     return;
   }
@@ -122,6 +109,7 @@ contract DutchAuction is Auction {
   // }
 
   function terminated() public view returns(bool) {
-    return block.number >= bidPhaseEndBlock();
+    return _winner != address(0) ||
+           block.number >= bidPhaseEndBlock();
   }
 }
