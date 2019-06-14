@@ -24,6 +24,34 @@ contract VickreyAuction is Auction {
     uint depositRequirement
   );
 
+  event LogBidCommitment(
+    address bidder,
+    bytes32 commitment
+  );
+
+  event LogWithdraw(
+    address bidder
+  );
+
+  event LogOpen(
+    address bidder,
+    bytes32 commitment,
+    bytes32 nonce,
+    uint bid
+  );
+
+  event LogChangeCurrentWinner(
+    address currentWinner,
+    uint bid
+  );
+
+  event LogFinalized(
+    address winner,
+    uint bid,
+    uint winningPrice,
+    uint burnedValue
+  );
+
   constructor(
     uint _reservePrice,
     uint _lengthCommitmentPhase,
@@ -94,6 +122,8 @@ contract VickreyAuction is Auction {
               'The value sent must be equal to depositRequirement');
 
       commitments[msg.sender] = commitment;
+
+      emit LogBidCommitment(msg.sender, commitment);
     }
 
     function debugGetBidCommitment() external view
@@ -139,6 +169,8 @@ contract VickreyAuction is Auction {
     {
       delete commitments[msg.sender];
       msg.sender.transfer(depositRequirement / 2);
+
+      emit LogWithdraw(msg.sender);
     }
 
 
@@ -177,6 +209,8 @@ contract VickreyAuction is Auction {
         'Invalid nonce or value'
       );
 
+      emit LogOpen(msg.sender, commitments[msg.sender], nonce, msg.value);
+
       msg.sender.transfer(depositRequirement);
       delete commitments[msg.sender];
 
@@ -189,6 +223,8 @@ contract VickreyAuction is Auction {
         }
         winnerValue = msg.value;
         _winner = msg.sender;
+
+        emit LogChangeCurrentWinner(_winner, winnerValue);
       }
       else {
         msg.sender.transfer(msg.value);
@@ -252,6 +288,8 @@ contract VickreyAuction is Auction {
       if(_burnedValue > 0) {
         address(0).transfer(_burnedValue);
       }
+
+      emit LogFinalized(_winner, winnerValue, winningPrice, _burnedValue);
     }
   // }
 
