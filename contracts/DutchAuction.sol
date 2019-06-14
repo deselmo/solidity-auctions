@@ -6,10 +6,10 @@ import "./ITimingFunction.sol";
 contract DutchAuction is Auction {
   uint public reservePrice;
   uint public initialPrice;
-  uint public bidPhaseLength;
+  uint public lengthBidPhase;
   ITimingFunction public timingFunction;
 
-  uint private bidPhaseLengthMinusOne;
+  uint private lengthBidPhaseMinusOne;
   uint private maxPriceOffset;
 
   event LogStartAuction(
@@ -38,17 +38,17 @@ contract DutchAuction is Auction {
 
     reservePrice = _reservePrice;
     initialPrice = _initialPrice;
-    bidPhaseLength = _duration;
+    lengthBidPhase = _duration;
     timingFunction = _timingFunction;
 
     maxPriceOffset = initialPrice - reservePrice;
-    bidPhaseLengthMinusOne = bidPhaseLength - 1;
+    lengthBidPhaseMinusOne = lengthBidPhase - 1;
 
     emit LogStartAuction(
       seller,
       reservePrice,
       initialPrice,
-      bidPhaseLength
+      lengthBidPhase
     );
   }
 
@@ -59,7 +59,7 @@ contract DutchAuction is Auction {
     return initialPrice - timingFunction.compute(
       maxPriceOffset,
       block.number - bidPhaseStartBlock(),
-      bidPhaseLengthMinusOne
+      lengthBidPhaseMinusOne
     );
   }
 
@@ -88,7 +88,7 @@ contract DutchAuction is Auction {
     }
 
     function bidPhaseEndBlock() internal view returns(uint) {
-      return bidPhaseStartBlock() + bidPhaseLength;
+      return bidPhaseStartBlock() + lengthBidPhase;
     }
 
     function inBidPhase() public view returns(bool) {
@@ -104,7 +104,7 @@ contract DutchAuction is Auction {
     }
 
     function debugTerminateBidPhase() external isDebug isInBidPhase {
-      bidPhaseLength = block.number + 1 - bidPhaseStartBlock();
+      lengthBidPhase = block.number + 1 - bidPhaseStartBlock();
     }
   // }
 

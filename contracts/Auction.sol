@@ -1,7 +1,8 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 contract Auction {
-  uint internal gracePhaseLength = 4500; // ~ 5 minuts
+  
+  uint internal lengthGracePhase = 4500; // ~ 5 minuts
   uint internal creationBlock;
 
   address payable public seller;
@@ -45,7 +46,7 @@ contract Auction {
     }
 
     function gracePhaseEndBlock() internal view returns(uint) {
-      return gracePhaseStartBlock() + gracePhaseLength;
+      return gracePhaseStartBlock() + lengthGracePhase;
     }
 
     function inGracePhase() public view returns(bool) {
@@ -60,7 +61,7 @@ contract Auction {
     }
 
     function debugTerminateGracePhase() external isDebug isInGracePhase {
-      gracePhaseLength = block.number + 1 - gracePhaseStartBlock();
+      lengthGracePhase = block.number + 1 - gracePhaseStartBlock();
     }
   // }
 
