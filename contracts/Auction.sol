@@ -1,7 +1,6 @@
 pragma solidity >=0.5.0 <0.6.0;
 
 contract Auction {
-  
   uint internal lengthGracePhase = 4500; // ~ 5 minuts
   uint internal creationBlock;
 
