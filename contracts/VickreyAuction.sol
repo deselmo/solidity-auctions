@@ -174,7 +174,7 @@ contract VickreyAuction is Auction {
     {
       require(
         keccak256(abi.encode(nonce, msg.value)) == commitments[msg.sender],
-        'Failed bid commitment opening'
+        'Invalid nonce or value'
       );
 
       msg.sender.transfer(depositRequirement);
