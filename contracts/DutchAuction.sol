@@ -77,7 +77,7 @@ contract DutchAuction is Auction {
     _winner = msg.sender;
     seller.transfer(msg.value);
 
-    emit LogEndAuction(true, msg.sender, msg.value, _currentPrice);
+    emit LogSold(msg.sender, msg.value, _currentPrice);
 
     return;
   }
