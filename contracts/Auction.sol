@@ -28,9 +28,7 @@ contract Auction {
   }
 
 
-  /**
-   * Get the winner of the auction, callable only if the auction is terminated
-   */
+  // Get the winner of the auction, callable only if the auction is terminated
   function winner() public view
     isTerminated
     returns(address)
@@ -39,22 +37,16 @@ contract Auction {
     return _winner;
   }
 
-  /**
-   * Debug function, get the balance of this auction
-   */
+  // Debug function, get the balance of this auction
   function debugBalance() public view isDebug returns(uint) {
     return address(this).balance;
   }
 
-  /**
-   * Debug function, create a dummy block, to pass the time
-   */
+  // Debug function, create a dummy block, to pass the time
   function debugDummyBlock() external payable isDebug { return; }
 
 
-  /**
-   * Modifier used to prevent a function from being called by the seller
-   */
+  // Modifier used to prevent a function from being called by the seller
   modifier isNotSeller() {
     require(msg.sender != seller, 'The seller cannot bid');
     _;
@@ -99,19 +91,15 @@ contract Auction {
   function terminated() public view returns(bool);
 
 
-  /**
-   * Modifier used to prevent a function from being called if the auction is terminated
-   */
+  // Modifier used to prevent a function from being called if the auction is terminated
   modifier isTerminated() {
     require(terminated(),
             'The auction must be completed to call this operation');
     _;
   }
 
-  /**
-   * Modifier used to prevent a function from being called if the auction is not
-   * in debug mode
-   */
+  // Modifier used to prevent a function from being called if the auction is not
+  // in debug mode
   modifier isDebug() {
     require(debug, 'This operation is available only in debug mode');
     _;
