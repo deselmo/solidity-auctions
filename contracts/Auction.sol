@@ -61,7 +61,7 @@ contract Auction {
   }
 
   /**
-   * The grace phace start after the action creation and end after
+   * The grace phase start after the action creation and end after
    * lengthGracePhase blocks
    */
   // gracePhase {
