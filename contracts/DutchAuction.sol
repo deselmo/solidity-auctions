@@ -26,7 +26,6 @@ contract DutchAuction is Auction {
     uint duration
   );
   event LogSold(
-    // address of the winner
     address winner,
 
     // value bid by the winner
@@ -77,7 +76,7 @@ contract DutchAuction is Auction {
     );
   }
 
-  // allow a bidder to make a bid
+  // Allow a bidder to make a bid
   // the auction ends immediately when there is a valid bid
   function bid() public payable
     isInBidPhase
