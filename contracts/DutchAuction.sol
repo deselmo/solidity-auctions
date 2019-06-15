@@ -64,11 +64,12 @@ contract DutchAuction is Auction {
     );
   }
 
-  // calculate the current price in the auction
+  // Calculate the current price in the auction
   function currentPrice() public view
     isInBidPhase
     returns(uint)
   {
+    // timingFunction will return a value gradually increasing in the block number
     return initialPrice - timingFunction.compute(
       maxPriceOffset,
       block.number - bidPhaseStartBlock(),
