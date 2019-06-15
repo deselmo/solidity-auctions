@@ -1,21 +1,29 @@
 pragma solidity >=0.5.0 <0.6.0;
 
+// file containing the abstract contract Auction
 import "./Auction.sol";
 
 contract VickreyAuction is Auction {
+  // Variables defined in the constructor
   uint public reservePrice;
   uint public lengthCommitmentPhase;
   uint public lengthWithdrawalPhase;
   uint public lengthPpeningPhase;
   uint public depositRequirement;
 
+  // Map containing the commitment associated with each bidder address
   mapping (address => bytes32) private commitments;
 
+  // Value of the bid of the winner
   uint private winnerValue;
+
+  // Value that the winner have to pay (sealed-bid second-price)
   uint private winningPrice;
 
+  // Value of burned ethereum, stored for debug
   uint private _burnedValue;
 
+  // Logs
   event LogStartAuction(
     address seller,
     uint lengthCommitmentPhase,
@@ -37,6 +45,8 @@ contract VickreyAuction is Auction {
     address bidder,
     bytes32 commitment,
     bytes32 nonce,
+
+    // value bid by the bidder
     uint bid
   );
 
@@ -47,8 +57,13 @@ contract VickreyAuction is Auction {
 
   event LogFinalized(
     address winner,
+
+    // value bid by the winner
     uint bid,
+
+    // value that the winner have to pay
     uint winningPrice,
+
     uint burnedValue
   );
 
@@ -71,6 +86,7 @@ contract VickreyAuction is Auction {
     lengthPpeningPhase = _lengthPpeningPhase;
     depositRequirement = _depositRequirement;
 
+    // winningPrice is initialized with the reservePrice
     winningPrice = reservePrice;
 
     emit LogStartAuction(
@@ -82,6 +98,7 @@ contract VickreyAuction is Auction {
     );
   }
 
+  // Debug function, compute the commitment that bidder can submit in commitment phase
   function debugComputeKeccak256(bytes32 nonce, uint value) external view
     isDebug
     returns(bytes32)
@@ -89,6 +106,8 @@ contract VickreyAuction is Auction {
     return keccak256(abi.encode(nonce, value));
   }
 
+
+  // Debug function, get how mutch value has been burned
   function debugBurnedValue() external view
     isDebug
     returns(uint)
@@ -96,23 +115,34 @@ contract VickreyAuction is Auction {
     return _burnedValue;
   }
 
+  // Private function
+  // return true if a commitment is present for the msg.sender
+  //        false otherwise
   function senderCommitmentPresent() private view returns(bool) {
     return commitments[msg.sender] != 0;
   }
 
+  // Modifier used to prevent a function from being called if the sender did not send a commitment
   modifier isSenderCommitmentPresent() {
     require(senderCommitmentPresent(),
             'There is no commitment for this bidder');
     _;
   }
 
+  // Modifier used to prevent a function from being called if the sender sent a commitment
   modifier isNotSenderCommitmentPresent() {
     require(!senderCommitmentPresent(),
             'There is already a commitment for this bidder');
     _;
   }
 
+  /**
+   * The commitment phase start after the grace phase and end after
+   * lengthCommitmentPhase blocks
+   */
   // commitmentPhase {
+
+    // Allow a bidder to make a commitment
     function submitBidCommitment(bytes32 commitment) external payable
       isInCommitmentPhase
       isNotSeller
@@ -126,6 +156,8 @@ contract VickreyAuction is Auction {
       emit LogBidCommitment(msg.sender, commitment);
     }
 
+
+    // Debug function, get the commitment for the caller bidder
     function debugGetBidCommitment() external view
       isDebug
       isInCommitmentPhase
@@ -137,6 +169,7 @@ contract VickreyAuction is Auction {
     }
 
 
+    // functions for managing commitment phase
     function commitmentPhaseStartBlock() private view returns(uint) {
       return gracePhaseEndBlock();
     }
@@ -161,7 +194,15 @@ contract VickreyAuction is Auction {
     }
   // }
 
+
+  /**
+   * The withdrawal phase start after the commitment phase and end after
+   * lengthWithdrawalPhase blocks
+   */
   // withdrawalPhase {
+
+    // Allows a bidder to withdraw from the auction
+    // and get half of the paid depositRequirement
     function withdraw() external
       isInWithdrawalPhase
       isNotSeller
@@ -174,6 +215,7 @@ contract VickreyAuction is Auction {
     }
 
 
+    // functions for managing withdrawal phase
     function withdrawalPhaseStartBlock() private view returns(uint) {
       return commitmentPhaseEndBlock();
     }
@@ -198,7 +240,17 @@ contract VickreyAuction is Auction {
     }
   // }
 
+
+  /**
+   * The opening phase start after the withdrawal phase and end after
+   * lengthOpeningPhase blocks
+   */
   // openingPhase {
+
+    // Allows a bidder to open its commitment;
+    // a limit has not been imposed on the number of attempts a user can make;
+    // if there's a new higher bid, the previous bidder with high bid is immediately refunded
+    // if the bid is not enough high, the bidder is immediately refunded
     function open(bytes32 nonce) external payable
       isInOpeningPhase
       isNotSeller
@@ -215,7 +267,7 @@ contract VickreyAuction is Auction {
       delete commitments[msg.sender];
 
       if(msg.value >= reservePrice &&
-        msg.value > winnerValue
+         msg.value > winnerValue
       ) {
         if(_winner != address(0)) {
           _winner.transfer(winnerValue);
@@ -229,8 +281,16 @@ contract VickreyAuction is Auction {
       else {
         msg.sender.transfer(msg.value);
       }
+
+      // if there is a bid with the same value of the winning price
+      // then the price to pay is equal to the highest bid
+      if(_winner != address(0) && msg.value == winnerValue) {
+        winningPrice = winnerValue;
+      }
     }
 
+
+    // functions for managing opening phase
     function openingPhaseStartBlock() private view returns(uint) {
       return withdrawalPhaseEndBlock();
     }
@@ -255,11 +315,17 @@ contract VickreyAuction is Auction {
     }
   // }
 
+
+  /**
+   * The finalization phase start after the opening phase and end when
+   * the finalize function is called
+   */
   // finalizationPhase {
     function finalizationPhaseStartBlock() private view returns(uint) {
       return openingPhaseEndBlock();
     }
 
+    // private variable which indicates whether the contract has been finalized or not
     bool private finalized = false;
 
     function inFinalizationPhase() public view returns(bool) {
@@ -273,6 +339,11 @@ contract VickreyAuction is Auction {
       _;
     }
 
+
+    // Finalize and terminate the contract;
+    // this function is callable only in finalization phase;
+    // If there is a winner: the winning value is sent to the seller
+    //                       and the winner is immediately refaunded
     function finalize() external isInFinalizationPhase {
       finalized = true;
 
@@ -291,8 +362,13 @@ contract VickreyAuction is Auction {
 
       emit LogFinalized(_winner, winnerValue, winningPrice, _burnedValue);
     }
+
+    // for the finalization phase there is not a debug function to force
+    // the termination because there are not time constraints
   // }
 
+
+  // The Vickrey auction terminated if the finalize function was successfully called
   function terminated() public view returns(bool) {
     return finalized;
   }
