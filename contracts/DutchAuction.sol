@@ -1,17 +1,24 @@
 pragma solidity >=0.5.0 <0.6.0;
 
+// file containing the abstract contract Auction
 import "./Auction.sol";
+
+// file containing only the interface ITimingFunction
+// some concrete contracts implementing this interface are in the file TimingFunctions.sol
 import "./ITimingFunction.sol";
 
 contract DutchAuction is Auction {
+  // Variables defined in the constructor
   uint public reservePrice;
   uint public initialPrice;
   uint public lengthBidPhase;
   ITimingFunction public timingFunction;
 
+  // Stored variables to avoid having to perform the same calculation several times
   uint private lengthBidPhaseMinusOne;
   uint private maxPriceOffset;
 
+  // Logs
   event LogStartAuction(
     address seller,
     uint reservePrice,
@@ -19,8 +26,13 @@ contract DutchAuction is Auction {
     uint duration
   );
   event LogSold(
+    // address of the winner
     address winner,
+
+    // value bid by the winner
     uint bid,
+
+    // value of the price during the winning bid
     uint currentPrice
   );
 
@@ -52,6 +64,7 @@ contract DutchAuction is Auction {
     );
   }
 
+  // calculate the current price in the auction
   function currentPrice() public view
     isInBidPhase
     returns(uint)
@@ -63,6 +76,8 @@ contract DutchAuction is Auction {
     );
   }
 
+  // allow a bidder to make a bid
+  // the auction ends immediately when there is a valid bid
   function bid() public payable
     isInBidPhase
     isNotSeller
@@ -82,6 +97,11 @@ contract DutchAuction is Auction {
     return;
   }
 
+
+  /**
+   * The bid phase start after the grace phase and end after
+   * lengthBidPhase blocks
+   */
   // bidPhase {
     function bidPhaseStartBlock() internal view returns(uint) {
       return gracePhaseEndBlock();
@@ -108,6 +128,7 @@ contract DutchAuction is Auction {
     }
   // }
 
+  // The dutch auction terminated if there is a winner or the bid phase is terminated
   function terminated() public view returns(bool) {
     return _winner != address(0) ||
            block.number >= bidPhaseEndBlock();
