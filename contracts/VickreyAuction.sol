@@ -279,13 +279,12 @@ contract VickreyAuction is Auction {
         emit LogChangeCurrentWinner(_winner, winnerValue);
       }
       else {
+        // if there is a bid with the same value of the winning price
+        // then the price to pay is equal to the highest bid
+        if(_winner != address(0) && msg.value == winnerValue) {
+          winningPrice = winnerValue;
+        }
         msg.sender.transfer(msg.value);
-      }
-
-      // if there is a bid with the same value of the winning price
-      // then the price to pay is equal to the highest bid
-      if(_winner != address(0) && msg.value == winnerValue) {
-        winningPrice = winnerValue;
       }
     }
 
