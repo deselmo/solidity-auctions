@@ -8,7 +8,7 @@ contract VickreyAuction is Auction {
   uint public reservePrice;
   uint public lengthCommitmentPhase;
   uint public lengthWithdrawalPhase;
-  uint public lengthPpeningPhase;
+  uint public lengthOpeningPhase;
   uint public depositRequirement;
 
   // Map containing the commitment associated with each bidder address
@@ -28,7 +28,7 @@ contract VickreyAuction is Auction {
     address seller,
     uint lengthCommitmentPhase,
     uint lengthWithdrawalPhase,
-    uint lengthPpeningPhase,
+    uint lengthOpeningPhase,
     uint depositRequirement
   );
 
@@ -71,19 +71,19 @@ contract VickreyAuction is Auction {
     uint _reservePrice,
     uint _lengthCommitmentPhase,
     uint _lengthWithdrawalPhase,
-    uint _lengthPpeningPhase,
+    uint _lengtOpeningPhase,
     uint _depositRequirement,
     bool _debug
   ) Auction(_debug) public {
     require(_lengthCommitmentPhase > 0,
             '_lengthCommitmentPhase must be bigger than 0');
-    require(_lengthPpeningPhase > 0,
-            '_lengthPpeningPhase must be bigger than 0');
+    require(_lengtOpeningPhase > 0,
+            '_lengtOpeningPhase must be bigger than 0');
 
     reservePrice = _reservePrice;
     lengthCommitmentPhase = _lengthCommitmentPhase;
     lengthWithdrawalPhase = _lengthWithdrawalPhase;
-    lengthPpeningPhase = _lengthPpeningPhase;
+    lengthOpeningPhase = _lengtOpeningPhase;
     depositRequirement = _depositRequirement;
 
     // winningPrice is initialized with the reservePrice
@@ -93,7 +93,7 @@ contract VickreyAuction is Auction {
       seller,
       lengthCommitmentPhase,
       lengthWithdrawalPhase,
-      lengthPpeningPhase,
+      lengthOpeningPhase,
       depositRequirement
     );
   }
@@ -296,7 +296,7 @@ contract VickreyAuction is Auction {
     }
 
     function openingPhaseEndBlock() private view returns(uint) {
-      return openingPhaseStartBlock() + lengthPpeningPhase;
+      return openingPhaseStartBlock() + lengthOpeningPhase;
     }
 
     function inOpeningPhase() public view returns(bool) {
@@ -311,7 +311,7 @@ contract VickreyAuction is Auction {
     }
 
     function debugTerminateOpeningPhase() external isDebug isInOpeningPhase {
-      lengthPpeningPhase = block.number + 1 - openingPhaseStartBlock();
+      lengthOpeningPhase = block.number + 1 - openingPhaseStartBlock();
     }
   // }
 
