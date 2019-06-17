@@ -55,7 +55,7 @@ contract VickreyAuction is Auction {
     uint bid
   );
 
-  event LogFinalized(
+  event LogSold(
     address winner,
 
     // value bid by the winner
@@ -64,6 +64,10 @@ contract VickreyAuction is Auction {
     // value that the winner have to pay
     uint winningPrice,
 
+    uint burnedValue
+  );
+
+  event LogNoWinner(
     uint burnedValue
   );
 
@@ -359,7 +363,11 @@ contract VickreyAuction is Auction {
         address(0).transfer(_burnedValue);
       }
 
-      emit LogFinalized(_winner, winnerValue, winningPrice, _burnedValue);
+      if(_winner != address(0)) {
+        emit LogSold(_winner, winnerValue, winningPrice, _burnedValue);
+      } else {
+        emit LogNoWinner(_burnedValue);
+      }
     }
 
     // for the finalization phase there is not a debug function to force
